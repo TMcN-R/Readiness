@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Section {
+  GOVERNANCE
+  RISK
+  SECURITY
+  CRISIS
+  BCP
+  PEOPLE
+  OPERATIONS
+  ASSURANCE
+}
+
+enum Answer {
+  NONE
+  AD_HOC
+  PARTIAL
+  FORMAL
+  EMBEDDED
+  NA
+}
+
+enum RiskLevel {
+  LOW
+  MODERATE
+  ELEVATED
+  SEVERE
+}
+
+enum OperationalFootprint {
+  SINGLE_SITE
+  MULTIPLE_SITES
+  MULTI_COUNTRY
+}
+
+enum OrganisationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+}
+
+model Organisation {
+  id              String             @id @default(cuid())
+  name            String
+  accessToken     String             @unique
+  status          OrganisationStatus @default(NOT_STARTED)
+  consultantName  String?
+  consultantEmail String?
+  consultantNotes String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  responses         Response[]
+  countries         Country[]
+  activityExposure  ActivityExposure?
+}
+
+model Question {
+  id      String   @id @default(cuid())
+  section Section
+  order   Int      @unique
+  text    String
+
+  responses Response[]
+}
+
+model Response {
+  id             String   @id @default(cuid())
+  organisationId String
+  questionId     String
+  answer         Answer
+  updatedAt      DateTime @updatedAt
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  question     Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([organisationId, questionId])
+}
+
+model Country {
+  id             String     @id @default(cuid())
+  organisationId String
+  name           String
+  riskLevel      RiskLevel?
+  createdAt      DateTime   @default(now())
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+}
+
+model ActivityExposure {
+  organisationId       String                @id
+  highRiskActivity     Boolean?
+  operationalFootprint OperationalFootprint?
+  updatedAt            DateTime              @updatedAt
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+}

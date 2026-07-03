@@ -1,0 +1,27 @@
+# dependencies
+node_modules
+
+# next.js
+.next/
+out/
+build/
+
+# generated prisma client
+/app/generated/prisma
+
+# local dev database
+.devdata/
+
+# env files (keep secrets out of version control)
+.env
+.env*.local
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+.~lock.*#
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

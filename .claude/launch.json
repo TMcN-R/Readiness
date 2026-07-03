@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "orra-web",
+      "runtimeExecutable": "/Users/timneill/.local/node/bin/node",
+      "runtimeArgs": [
+        "/Users/timneill/.local/node/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "dev"
+      ],
+      "port": 3000,
+      "env": {
+        "PATH": "/Users/timneill/.local/node/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+      }
+    }
+  ]
+}
