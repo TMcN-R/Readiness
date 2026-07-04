@@ -9,6 +9,7 @@ const STEPS = [
   { href: "step-3", label: "3. Activity & Exposure" },
   { href: "dashboard", label: "4. Dashboard" },
   { href: "results", label: "5. Results" },
+  { href: "guide", label: "Guide" },
 ];
 
 export default async function AssessmentLayout({

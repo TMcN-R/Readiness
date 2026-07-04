@@ -10,13 +10,43 @@ type Question = {
   text: string;
 };
 
-const ANSWER_OPTIONS: { value: Answer; label: string }[] = [
-  { value: "NONE", label: "No / None" },
-  { value: "AD_HOC", label: "Ad hoc" },
-  { value: "PARTIAL", label: "Partial" },
-  { value: "FORMAL", label: "Formal" },
-  { value: "EMBEDDED", label: "Embedded" },
-  { value: "NA", label: "N/A" },
+const ANSWER_OPTIONS: { value: Answer; label: string; definition: string }[] = [
+  {
+    value: "NONE",
+    label: "No / None",
+    definition:
+      "Not defined and not implemented. No clear structure, process, or approach is in place.",
+  },
+  {
+    value: "AD_HOC",
+    label: "Ad hoc / Informal",
+    definition:
+      "Not formally defined, but some informal or inconsistent practice exists. Activities may happen but are unplanned or unreliable.",
+  },
+  {
+    value: "PARTIAL",
+    label: "Partial / Infrequent",
+    definition:
+      "Some elements exist but are incomplete, inconsistently applied, or gaps remain in practice.",
+  },
+  {
+    value: "FORMAL",
+    label: "Formal",
+    definition:
+      "Formally defined and consistently implemented across most of the organisation. Processes are clearly documented and communicated.",
+  },
+  {
+    value: "EMBEDDED",
+    label: "Embedded",
+    definition:
+      "Fully integrated and consistently applied across the organisation. Routinely used in decision-making and continuously improved.",
+  },
+  {
+    value: "NA",
+    label: "N/A",
+    definition:
+      "Not applicable. Use only where a question genuinely does not apply — not as a substitute for No / None.",
+  },
 ];
 
 const SECTION_LABEL: Record<Section, string> = {
@@ -68,6 +98,20 @@ export default function AssessmentForm({
       <div className="sticky top-0 z-10 -mx-6 border-b border-zinc-200 bg-zinc-50/95 px-6 py-2 text-sm text-zinc-600 backdrop-blur">
         {answeredCount} of {totalQuestions} answered
       </div>
+
+      <details className="rounded-md border border-zinc-200 bg-white p-4">
+        <summary className="cursor-pointer text-sm font-medium text-zinc-800">
+          What do these responses mean?
+        </summary>
+        <dl className="mt-3 flex flex-col gap-2">
+          {ANSWER_OPTIONS.map((opt) => (
+            <div key={opt.value}>
+              <dt className="text-sm font-medium text-zinc-900">{opt.label}</dt>
+              <dd className="text-sm text-zinc-600">{opt.definition}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
 
       {sections.map(({ section, questions }) => (
         <section key={section}>
