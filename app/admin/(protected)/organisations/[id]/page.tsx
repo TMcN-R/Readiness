@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
+import Link from "next/link";
 import {
   getOrganisationById,
   getCountries,
@@ -34,13 +35,21 @@ export default async function OrganisationDetailPage({
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8">
-      <div>
-        <h1 className="text-xl font-semibold text-zinc-900">{org.name}</h1>
-        {assessmentUrl && (
-          <p className="mt-1 text-sm text-zinc-500">
-            Client link: <code className="rounded bg-zinc-100 px-1.5 py-0.5">{assessmentUrl}</code>
-          </p>
-        )}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-zinc-900">{org.name}</h1>
+          {assessmentUrl && (
+            <p className="mt-1 text-sm text-zinc-500">
+              Client link: <code className="rounded bg-zinc-100 px-1.5 py-0.5">{assessmentUrl}</code>
+            </p>
+          )}
+        </div>
+        <Link
+          href={`/admin/organisations/${id}/report`}
+          className="shrink-0 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+        >
+          View report
+        </Link>
       </div>
 
       <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">

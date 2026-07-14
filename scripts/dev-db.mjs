@@ -1,14 +1,19 @@
+import { existsSync } from "node:fs";
 import EmbeddedPostgres from "embedded-postgres";
 
+const DATA_DIR = "./.devdata/pgdata";
+
 const pg = new EmbeddedPostgres({
-  databaseDir: "./.devdata/pgdata",
+  databaseDir: DATA_DIR,
   user: "postgres",
   password: "postgres",
   port: 5433,
   persistent: true,
 });
 
-await pg.initialise();
+if (!existsSync(DATA_DIR)) {
+  await pg.initialise();
+}
 await pg.start();
 await pg.createDatabase("orra").catch(() => {});
 

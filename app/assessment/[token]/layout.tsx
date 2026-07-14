@@ -24,7 +24,7 @@ export default async function AssessmentLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-zinc-200 bg-white px-6 py-4">
+      <header className="border-b border-zinc-200 bg-white px-6 py-4 print:hidden">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <Image src="/maravi-logo.png" alt="Maravi Group" width={140} height={32} />
           <span className="text-sm font-medium text-zinc-600">{org.name}</span>
@@ -41,7 +41,7 @@ export default async function AssessmentLayout({
           ))}
         </nav>
       </header>
-      <main className="flex-1 bg-zinc-50 px-6 py-8">
+      <main className="flex-1 bg-zinc-50 px-6 py-8 print:bg-white print:p-0">
         <div className="mx-auto max-w-4xl">{children}</div>
       </main>
     </div>

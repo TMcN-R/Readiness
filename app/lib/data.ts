@@ -115,6 +115,8 @@ export async function computeDashboard(organisationId: string) {
     actual,
     actualLevel,
     summary,
+    exposureDivisor: divisor,
+    countryRiskLevels,
     sectionScores: sectionScores.map((s) => ({
       ...s,
       priority: sectionPriority(s.score),
