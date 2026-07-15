@@ -4,7 +4,7 @@ export default function GuidePage() {
       <div>
         <h1 className="mb-2 text-xl font-semibold text-zinc-900">Client User Guide</h1>
         <p className="text-zinc-600">
-          This guide explains how the ORRA Field Readiness Tool works and how to use it.
+          This guide explains how the CoreStone™ Resilience Assessment works and how to use it.
         </p>
       </div>
 

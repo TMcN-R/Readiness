@@ -12,7 +12,7 @@ export default function Home() {
         className="mb-8"
       />
       <h1 className="max-w-xl text-2xl font-semibold text-zinc-900">
-        ORRA Field Readiness Tool
+        CoreStone™ Resilience Assessment
       </h1>
       <p className="mt-4 max-w-md text-zinc-600">
         This tool helps NGOs and charities operating in Africa assess their

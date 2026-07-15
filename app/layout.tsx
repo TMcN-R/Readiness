@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ORRA Field Readiness Tool | Maravi Group",
+  title: "CoreStone™ Resilience Assessment | Maravi Group",
   description:
     "Assess your organisation's resilience readiness for your operating context.",
 };
