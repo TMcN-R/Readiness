@@ -6,7 +6,8 @@ import {
   getCountries,
   computeDashboard,
 } from "@/app/lib/data";
-import { setCountryRisk, updateOrganisationDetails } from "./actions";
+import { setCountryRisk, updateOrganisationDetails, deleteOrganisation } from "./actions";
+import DeleteOrganisationButton from "./DeleteOrganisationButton";
 
 const RISK_LEVELS = ["LOW", "MODERATE", "ELEVATED", "SEVERE"] as const;
 
@@ -169,6 +170,19 @@ export default async function OrganisationDetailPage({
             </button>
           </div>
         </form>
+      </section>
+
+      <section className="rounded-lg border border-red-200 bg-white p-6">
+        <h2 className="mb-1 text-base font-semibold text-zinc-900">Danger zone</h2>
+        <p className="mb-4 text-sm text-zinc-500">
+          Permanently delete this organisation, including all assessment responses, countries,
+          and activity data. This cannot be undone.
+        </p>
+        <DeleteOrganisationButton
+          organisationId={id}
+          organisationName={org.name}
+          action={deleteOrganisation}
+        />
       </section>
     </div>
   );
