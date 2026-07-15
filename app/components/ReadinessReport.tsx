@@ -180,7 +180,7 @@ export default function ReadinessReport({ org, dashboard }: { org: Org; dashboar
           {org.consultantName ? `, ${org.consultantName}` : ""}
           {org.consultantEmail ? ` (${org.consultantEmail})` : ""}.
         </p>
-        <p className="mt-2 text-sm text-zinc-500">www.maravi.co.uk &middot; info@maravi.co.uk</p>
+        <p className="mt-2 text-sm text-zinc-500">www.maravigroup.com &middot; contact@maravigroup.com</p>
       </section>
     </div>
   );
