@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireOrganisationByToken } from "@/app/lib/data";
+import { requireOrganisationByToken, getQuestions } from "@/app/lib/data";
 
 export default async function AssessmentOverviewPage({
   params,
@@ -8,6 +8,7 @@ export default async function AssessmentOverviewPage({
 }) {
   const { token } = await params;
   const org = await requireOrganisationByToken(token);
+  const questions = await getQuestions();
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,7 +26,7 @@ export default async function AssessmentOverviewPage({
         <StepCard
           href={`/assessment/${token}/step-1`}
           title="Step 1 · Assessment"
-          description="Answer 55 questions about your current risk, security, and resilience capability."
+          description={`Answer ${questions.length} questions about your current risk, security, and resilience capability.`}
         />
         <StepCard
           href={`/assessment/${token}/step-2`}
