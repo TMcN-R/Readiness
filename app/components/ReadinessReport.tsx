@@ -1,11 +1,12 @@
 import Image from "next/image";
 import type { computeDashboard } from "@/app/lib/data";
 import {
-  recommendCoreStoneTier,
+  generateIndicativeRecommendation,
   describeExposure,
   CORESTONE_TIERS,
-  CORESTONE_TIER_INFO,
+  CORESTONE_CATALOG,
 } from "@/app/lib/corestone";
+import { SECTION_LABEL } from "@/app/lib/scoring";
 import type { Section, SectionPriority } from "@/app/lib/scoring";
 
 type Dashboard = Awaited<ReturnType<typeof computeDashboard>>;
@@ -16,16 +17,9 @@ type Org = {
   consultantEmail: string | null;
 };
 
-const SECTION_LABEL: Record<Section, string> = {
-  GOVERNANCE: "Governance",
-  RISK: "Risk",
-  SECURITY: "Security",
-  CRISIS: "Crisis",
-  BCP: "Business Continuity",
-  PEOPLE: "People",
-  OPERATIONS: "Operations",
-  ASSURANCE: "Assurance",
-};
+function formatUSD(amount: number): string {
+  return `$${amount.toLocaleString("en-US")}`;
+}
 
 const SECTION_FOCUS: Record<Section, string> = {
   GOVERNANCE: "Strengthen leadership accountability and oversight",
@@ -51,11 +45,13 @@ export default function ReadinessReport({ org, dashboard }: { org: Org; dashboar
     dashboard.countryRiskLevels
   );
 
-  const recommendation = recommendCoreStoneTier(
-    dashboard.actualLevel,
-    dashboard.exposureDivisor,
-    exposureDescription
-  );
+  const recommendation = generateIndicativeRecommendation({
+    actualLevel: dashboard.actualLevel,
+    actualFraction: dashboard.actual,
+    divisor: dashboard.exposureDivisor,
+    exposureDescription,
+    sectionScores: dashboard.sectionScores,
+  });
 
   const generatedDate = new Date().toLocaleDateString("en-GB", {
     day: "numeric",
@@ -145,10 +141,67 @@ export default function ReadinessReport({ org, dashboard }: { org: Org; dashboar
 
       <section className="print:break-inside-avoid">
         <h2 className="mb-1 text-base font-semibold text-zinc-900">Recommended level of support</h2>
-        <p className="mb-4 text-sm text-zinc-600">{recommendation.rationale}</p>
-        <div className="grid gap-3 sm:grid-cols-3">
+
+        <div className="rounded-lg border-2 border-zinc-900 bg-white p-5">
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            Recommended
+          </div>
+          <h3 className="text-lg font-semibold text-zinc-900">{recommendation.name}</h3>
+          <p className="mt-1 text-sm text-zinc-600">{recommendation.description}</p>
+
+          <p className="mt-4 text-sm text-zinc-700">{recommendation.rationale}</p>
+
+          {recommendation.selectedComponents.length > 0 && (
+            <p className="mt-3 text-sm text-zinc-700">
+              Within {recommendation.name}, this would likely mean prioritising:{" "}
+              <strong>{recommendation.selectedComponents.join(", ")}</strong>.
+            </p>
+          )}
+
+          {recommendation.boundaryTier ? (
+            <div className="mt-4 flex flex-col gap-1">
+              <p className="text-sm text-zinc-700">
+                Your profile sits close to the boundary between {recommendation.name} and{" "}
+                {CORESTONE_CATALOG[recommendation.boundaryTier].name} &mdash; both are shown below.
+              </p>
+              <p className="text-sm text-zinc-800">
+                <strong>{recommendation.name}</strong> is typically{" "}
+                {formatUSD(recommendation.standardFee)}/year (range{" "}
+                {formatUSD(recommendation.feeBandLow)}&ndash;{formatUSD(recommendation.feeBandHigh)}).
+              </p>
+              <p className="text-sm text-zinc-800">
+                <strong>{CORESTONE_CATALOG[recommendation.boundaryTier].name}</strong> is typically{" "}
+                {formatUSD(CORESTONE_CATALOG[recommendation.boundaryTier].standardFee)}/year (range{" "}
+                {formatUSD(CORESTONE_CATALOG[recommendation.boundaryTier].feeBandLow)}&ndash;
+                {formatUSD(CORESTONE_CATALOG[recommendation.boundaryTier].feeBandHigh)}).
+              </p>
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-zinc-800">
+              {recommendation.name} is typically{" "}
+              <strong>{formatUSD(recommendation.standardFee)}/year</strong>, with a realistic
+              range of {formatUSD(recommendation.feeBandLow)}&ndash;
+              {formatUSD(recommendation.feeBandHigh)} depending on final scope.
+            </p>
+          )}
+
+          <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3">
+            <p className="text-xs text-zinc-700">{recommendation.disclaimer}</p>
+          </div>
+
+          <p className="mt-3 text-sm text-zinc-600">{recommendation.modularNote}</p>
+
+          <p className="mt-4 text-sm text-zinc-700">
+            Ready to talk this through? Contact your Maravi consultant
+            {org.consultantName ? `, ${org.consultantName}` : ""}
+            {org.consultantEmail ? ` (${org.consultantEmail})` : ""} to discuss scope and next
+            steps.
+          </p>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
           {CORESTONE_TIERS.map((tier) => {
-            const info = CORESTONE_TIER_INFO[tier];
+            const info = CORESTONE_CATALOG[tier];
             const isRecommended = tier === recommendation.tier;
             return (
               <div

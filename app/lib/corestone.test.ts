@@ -4,9 +4,15 @@ import {
   complexityBand,
   recommendedTier,
   describeExposure,
-  recommendCoreStoneTier,
-  CORESTONE_TIER_INFO,
+  boundaryTier,
+  selectComponents,
+  generateIndicativeRecommendation,
+  CORESTONE_CATALOG,
+  CORESTONE_TIERS,
+  DOMAIN_TO_SPRINT_MAP,
+  CORESTONE_DISCLAIMER,
 } from "./corestone";
+import { SECTIONS } from "./scoring";
 import type { ReadinessLevel } from "./scoring";
 
 test("complexityBand boundaries", () => {
@@ -61,11 +67,106 @@ test("describeExposure handles no countries entered", () => {
   assert.doesNotMatch(desc, /risk country/);
 });
 
-test("recommendCoreStoneTier returns matching tier info and a rationale mentioning the level", () => {
-  const rec = recommendCoreStoneTier("Fragile", 2.5, "high-risk activity across multi-country operations");
+test("CORESTONE_CATALOG matches Maravi's fixed fee/band/day/sprint-slot figures", () => {
+  assert.deepEqual(
+    {
+      fee: CORESTONE_CATALOG.RISK_FOUNDATIONS.standardFee,
+      low: CORESTONE_CATALOG.RISK_FOUNDATIONS.feeBandLow,
+      high: CORESTONE_CATALOG.RISK_FOUNDATIONS.feeBandHigh,
+      days: CORESTONE_CATALOG.RISK_FOUNDATIONS.days,
+      slots: CORESTONE_CATALOG.RISK_FOUNDATIONS.sprintSlots,
+    },
+    { fee: 6500, low: 5500, high: 9500, days: 9, slots: 1 }
+  );
+  assert.deepEqual(
+    {
+      fee: CORESTONE_CATALOG.RESILIENCE_PARTNER.standardFee,
+      low: CORESTONE_CATALOG.RESILIENCE_PARTNER.feeBandLow,
+      high: CORESTONE_CATALOG.RESILIENCE_PARTNER.feeBandHigh,
+      days: CORESTONE_CATALOG.RESILIENCE_PARTNER.days,
+      slots: CORESTONE_CATALOG.RESILIENCE_PARTNER.sprintSlots,
+    },
+    { fee: 21000, low: 18000, high: 28000, days: 28, slots: 3 }
+  );
+  assert.deepEqual(
+    {
+      fee: CORESTONE_CATALOG.STRATEGIC_ALLIANCE.standardFee,
+      low: CORESTONE_CATALOG.STRATEGIC_ALLIANCE.feeBandLow,
+      high: CORESTONE_CATALOG.STRATEGIC_ALLIANCE.feeBandHigh,
+      days: CORESTONE_CATALOG.STRATEGIC_ALLIANCE.days,
+      slots: CORESTONE_CATALOG.STRATEGIC_ALLIANCE.sprintSlots,
+    },
+    { fee: 42000, low: 35000, high: 60000, days: 56, slots: 5 }
+  );
+});
+
+test("DOMAIN_TO_SPRINT_MAP has all 8 sections mapped for all 3 tiers", () => {
+  for (const section of SECTIONS) {
+    for (const tier of CORESTONE_TIERS) {
+      assert.equal(
+        typeof DOMAIN_TO_SPRINT_MAP[section][tier],
+        "string",
+        `${section} x ${tier} should map to a theme`
+      );
+    }
+  }
+});
+
+test("selectComponents de-duplicates and caps at the tier's sprint slot count", () => {
+  // Risk Foundations has 1 slot - even 3 weak domains yield exactly 1 theme.
+  const rf = selectComponents("RISK_FOUNDATIONS", ["SECURITY", "CRISIS", "OPERATIONS"]);
+  assert.equal(rf.length, 1);
+  assert.equal(rf[0], "Travel risk procedures");
+
+  // GOVERNANCE and RISK share the same Resilience Partner theme ("Risk governance"),
+  // so 3 weak domains collapse to 2 distinct themes, not 3.
+  const rp = selectComponents("RESILIENCE_PARTNER", ["GOVERNANCE", "RISK", "BCP"]);
+  assert.deepEqual(rp, ["Risk governance", "Business continuity planning"]);
+
+  // Strategic Alliance has 5 slots - 3 distinct weak-domain themes all fit.
+  const sa = selectComponents("STRATEGIC_ALLIANCE", ["SECURITY", "CRISIS", "PEOPLE"]);
+  assert.equal(sa.length, 3);
+});
+
+test("boundaryTier returns null when comfortably inside a tier's bands", () => {
+  // Mature readiness (>=0.85) with Low complexity (divisor well under 1.4) is
+  // solidly Risk Foundations on every nudge.
+  assert.equal(boundaryTier(0.95, 1.0), null);
+});
+
+test("boundaryTier returns the alternate tier near a band edge", () => {
+  // 0.49 is one point inside Fragile (poor); nudging +0.03 crosses into
+  // Developing (also poor's neighbour) but that alone doesn't change tier
+  // unless complexity is also near its own edge. Use a divisor right at the
+  // Medium/High complexity edge (2.0) so nudging it changes the tier.
+  const result = boundaryTier(0.6, 1.95);
+  assert.notEqual(result, null);
+});
+
+test("generateIndicativeRecommendation: fee is a direct catalog lookup, never derived", () => {
+  const rec = generateIndicativeRecommendation({
+    actualLevel: "Fragile",
+    actualFraction: 0.35,
+    divisor: 2.5,
+    exposureDescription: "high-risk activity across multi-country operations",
+    sectionScores: [
+      { section: "SECURITY", score: 20 },
+      { section: "CRISIS", score: 30 },
+      { section: "GOVERNANCE", score: 90 },
+      { section: "RISK", score: 90 },
+      { section: "BCP", score: 90 },
+      { section: "PEOPLE", score: 90 },
+      { section: "OPERATIONS", score: 90 },
+      { section: "ASSURANCE", score: 90 },
+    ],
+  });
+
   assert.equal(rec.tier, "STRATEGIC_ALLIANCE");
-  assert.equal(rec.name, CORESTONE_TIER_INFO.STRATEGIC_ALLIANCE.name);
-  assert.equal(rec.description, CORESTONE_TIER_INFO.STRATEGIC_ALLIANCE.description);
+  assert.equal(rec.standardFee, CORESTONE_CATALOG.STRATEGIC_ALLIANCE.standardFee);
+  assert.equal(rec.feeBandLow, CORESTONE_CATALOG.STRATEGIC_ALLIANCE.feeBandLow);
+  assert.equal(rec.feeBandHigh, CORESTONE_CATALOG.STRATEGIC_ALLIANCE.feeBandHigh);
+  assert.equal(rec.disclaimer, CORESTONE_DISCLAIMER);
+  assert.ok(rec.selectedComponents.length <= CORESTONE_CATALOG.STRATEGIC_ALLIANCE.sprintSlots);
   assert.match(rec.rationale, /Fragile/);
-  assert.match(rec.rationale, /Strategic Alliance/);
+  assert.match(rec.rationale, /Security/);
 });

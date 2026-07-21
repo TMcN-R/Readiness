@@ -27,6 +27,17 @@ export const SECTIONS: Section[] = [
   "ASSURANCE",
 ];
 
+export const SECTION_LABEL: Record<Section, string> = {
+  GOVERNANCE: "Governance",
+  RISK: "Risk",
+  SECURITY: "Security",
+  CRISIS: "Crisis",
+  BCP: "Business Continuity",
+  PEOPLE: "People",
+  OPERATIONS: "Operations",
+  ASSURANCE: "Assurance",
+};
+
 const ANSWER_SCORE: Record<Answer, number | null> = {
   NONE: 0,
   AD_HOC: 1,
